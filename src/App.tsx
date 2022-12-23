@@ -123,7 +123,8 @@ function App() {
         size={ICON_SIZE}
         onClick={(event) => {
           event.stopPropagation();
-          StartRecord();
+          if (stat == STATS.RECORD) StopRecord();
+          else StartRecord();
         }}
       >
         <IconMicrophone

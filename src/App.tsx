@@ -123,7 +123,7 @@ function App() {
         size={ICON_SIZE}
         onClick={(event) => {
           event.stopPropagation();
-          if (stat == STATS.RECORD) StopRecord();
+          if (stat === STATS.RECORD) StopRecord();
           else StartRecord();
         }}
       >

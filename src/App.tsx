@@ -1,10 +1,11 @@
 import "./App.css";
 import { ActionIcon, Box, useMantineTheme } from "@mantine/core";
 import { IconMicrophone, IconPlayerPlay, IconPlayerStop } from "@tabler/icons";
-import { useState, MouseEvent } from "react";
+import { useState } from "react";
+import { showNotification } from "@mantine/notifications";
 
-const ICON_SIZE = 192,
-  GAP = 16;
+const GAP = 16;
+const ICON_SIZE = 192;
 const STATS = {
   NONE: 0,
   RECORD: 1,
@@ -12,10 +13,11 @@ const STATS = {
   PLAY: 3,
 };
 
+let mediaRecorder: MediaRecorder | undefined;
+const audioElement = document.createElement("audio");
+
 function App() {
   const theme = useMantineTheme();
-  const [stat, setStat] = useState(STATS.NONE);
-
   const COLORS = {
     BACK: [
       theme.colors.gray[0],
@@ -31,19 +33,55 @@ function App() {
     ],
   };
 
-  function onRecord(event: MouseEvent) {
-    event.stopPropagation();
-    setStat(STATS.RECORD);
+  const [stat, setStat] = useState(STATS.NONE);
+
+  let audios: Blob[] = [];
+
+  async function StartRecord() {
+    // Request permission
+    if (mediaRecorder) {
+      setStat(STATS.RECORD);
+      if (mediaRecorder) mediaRecorder.start();
+    } else {
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          setStat(STATS.RECORD);
+
+          // Init microphone
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = (event) => audios.push(event.data);
+          mediaRecorder.onstop = () =>
+            (audioElement.src = window.URL.createObjectURL(
+              audios[audios.length - 1]
+            ));
+          audioElement.addEventListener("ended", () => setStat(STATS.DONE));
+
+          // Start recording
+          if (mediaRecorder) mediaRecorder.start();
+        })
+        .catch((reason) => {
+          setStat(STATS.NONE);
+          showNotification({
+            title: reason.message,
+            message: "Please give microphone permission on the browser!",
+            color: "red",
+          });
+        });
+    }
   }
-  function onPlay(event: MouseEvent) {
-    if (stat !== STATS.DONE) return;
-    event.stopPropagation();
-    setStat(STATS.PLAY);
-  }
-  function onStop(event: MouseEvent) {
-    if (stat !== STATS.PLAY) return;
-    event.stopPropagation();
+  async function StopRecord() {
     setStat(STATS.DONE);
+    if (mediaRecorder) mediaRecorder.stop();
+  }
+  async function PlayAudio() {
+    setStat(STATS.PLAY);
+    audioElement.play();
+  }
+  async function StopAudio() {
+    setStat(STATS.DONE);
+    audioElement.pause();
+    audioElement.currentTime = 0;
   }
 
   return (
@@ -55,7 +93,21 @@ function App() {
         transition: "background-color 0.2s",
       }}
       onClick={() => {
-        setStat(stat === STATS.PLAY ? STATS.RECORD : stat + 1);
+        switch (stat) {
+          case STATS.NONE:
+            StartRecord();
+            break;
+          case STATS.RECORD:
+            StopRecord();
+            break;
+          case STATS.DONE:
+            PlayAudio();
+            break;
+          case STATS.PLAY:
+            StopAudio();
+            StartRecord();
+            break;
+        }
       }}
     >
       <ActionIcon
@@ -69,7 +121,10 @@ function App() {
         }}
         variant="transparent"
         size={ICON_SIZE}
-        onClick={onRecord}
+        onClick={(event) => {
+          event.stopPropagation();
+          StartRecord();
+        }}
       >
         <IconMicrophone
           style={{ transition: "stroke 0.2s" }}
@@ -89,7 +144,11 @@ function App() {
         }}
         variant="transparent"
         size={ICON_SIZE}
-        onClick={onPlay}
+        onClick={(event) => {
+          if (stat !== STATS.DONE) return;
+          event.stopPropagation();
+          PlayAudio();
+        }}
       >
         <IconPlayerPlay
           style={{ transition: "stroke 0.2s" }}
@@ -109,7 +168,11 @@ function App() {
         }}
         variant="transparent"
         size={ICON_SIZE}
-        onClick={onStop}
+        onClick={(event) => {
+          if (stat !== STATS.PLAY) return;
+          event.stopPropagation();
+          StopAudio();
+        }}
       >
         <IconPlayerStop
           style={{ transition: "stroke 0.2s" }}

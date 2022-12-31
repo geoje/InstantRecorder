@@ -79,7 +79,7 @@ function App() {
     audioElement.play();
   }
   async function StopAudio() {
-    setStat(STATS.DONE);
+    if (stat === STATS.PLAY) setStat(STATS.DONE);
     audioElement.pause();
     audioElement.currentTime = 0;
   }

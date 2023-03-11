@@ -84,7 +84,7 @@ export default function Home() {
     audioElement.play();
   }
   async function StopAudio() {
-    setStat(STATS.DONE);
+    if (stat === STATS.PLAY) setStat(STATS.DONE);
     audioElement.pause();
     audioElement.currentTime = 0;
   }
@@ -128,7 +128,8 @@ export default function Home() {
         size={ICON_SIZE}
         onClick={(event) => {
           event.stopPropagation();
-          StartRecord();
+          if (stat === STATS.RECORD) StopRecord();
+          else StartRecord();
         }}
       >
         <IconMicrophone

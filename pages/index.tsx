@@ -1,8 +1,11 @@
-import "./App.css";
 import { ActionIcon, Box, useMantineTheme } from "@mantine/core";
-import { IconMicrophone, IconPlayerPlay, IconPlayerStop } from "@tabler/icons";
-import { useState } from "react";
 import { showNotification } from "@mantine/notifications";
+import {
+  IconMicrophone,
+  IconPlayerPlay,
+  IconPlayerStop,
+} from "@tabler/icons-react";
+import { useEffect, useState } from "react";
 
 const GAP = 16;
 const ICON_SIZE = 192;
@@ -12,11 +15,10 @@ const STATS = {
   DONE: 2,
   PLAY: 3,
 };
-
 let mediaRecorder: MediaRecorder | undefined;
-const audioElement = document.createElement("audio");
+let audioElement: HTMLAudioElement;
 
-function App() {
+export default function Home() {
   const theme = useMantineTheme();
   const COLORS = {
     BACK: [
@@ -32,10 +34,13 @@ function App() {
       theme.colors.blue[8],
     ],
   };
-
   const [stat, setStat] = useState(STATS.NONE);
 
   let audios: Blob[] = [];
+
+  useEffect(() => {
+    audioElement = document.createElement("audio");
+  }, []);
 
   async function StartRecord() {
     // Request permission
@@ -183,5 +188,3 @@ function App() {
     </Box>
   );
 }
-
-export default App;

@@ -5,7 +5,11 @@ import {
   IconPlayerPlay,
   IconPlayerStop,
 } from "@tabler/icons-react";
+import Head from "next/head";
 import { useEffect, useState } from "react";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useTranslation } from "next-i18next";
+import { GetStaticProps } from "next";
 
 const GAP = 16;
 const ICON_SIZE = 192;
@@ -17,6 +21,12 @@ const STATS = {
 };
 let mediaRecorder: MediaRecorder | undefined;
 let audioElement: HTMLAudioElement;
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? "en", ["common"])),
+  },
+});
 
 export default function Home() {
   const theme = useMantineTheme();
@@ -35,6 +45,7 @@ export default function Home() {
     ],
   };
   const [stat, setStat] = useState(STATS.NONE);
+  const { t } = useTranslation();
 
   let audios: Blob[] = [];
 
@@ -90,102 +101,107 @@ export default function Home() {
   }
 
   return (
-    <Box
-      sx={{
-        backgroundColor: COLORS.BACK[stat],
-        height: "100%",
-        cursor: "pointer",
-        transition: "background-color 0.2s",
-      }}
-      onClick={() => {
-        switch (stat) {
-          case STATS.NONE:
-            StartRecord();
-            break;
-          case STATS.RECORD:
-            StopRecord();
-            break;
-          case STATS.DONE:
+    <>
+      <Head>
+        <title>{t("Instant Recorder")}</title>
+      </Head>
+      <Box
+        sx={{
+          backgroundColor: COLORS.BACK[stat],
+          height: "100%",
+          cursor: "pointer",
+          transition: "background-color 0.2s",
+        }}
+        onClick={() => {
+          switch (stat) {
+            case STATS.NONE:
+              StartRecord();
+              break;
+            case STATS.RECORD:
+              StopRecord();
+              break;
+            case STATS.DONE:
+              PlayAudio();
+              break;
+            case STATS.PLAY:
+              StopAudio();
+              StartRecord();
+              break;
+          }
+        }}
+      >
+        <ActionIcon
+          style={{
+            position: "absolute",
+            top: `calc(50% - ${ICON_SIZE / 2}px)`,
+            left: `calc(50% - ${ICON_SIZE / 2}px - ${
+              stat <= STATS.RECORD ? 0 : (ICON_SIZE + GAP) / 2
+            }px)`,
+            transition: "top 0.2s, left 0.2s",
+          }}
+          variant="transparent"
+          size={ICON_SIZE}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (stat === STATS.RECORD) StopRecord();
+            else StartRecord();
+          }}
+        >
+          <IconMicrophone
+            style={{ transition: "stroke 0.2s" }}
+            color={COLORS.FRONT[stat]}
+            size={ICON_SIZE}
+          />
+        </ActionIcon>
+        <ActionIcon
+          style={{
+            position: "absolute",
+            top: `calc(50% - ${ICON_SIZE / 2}px - ${
+              stat === STATS.DONE ? 0 : ICON_SIZE
+            }px)`,
+            left: `calc(50% + ${GAP / 2}px)`,
+            opacity: stat === STATS.DONE ? 1 : 0,
+            transition: "top 0.2s, left 0.2s, opacity 0.2s",
+          }}
+          variant="transparent"
+          size={ICON_SIZE}
+          onClick={(event) => {
+            if (stat !== STATS.DONE) return;
+            event.stopPropagation();
             PlayAudio();
-            break;
-          case STATS.PLAY:
+          }}
+        >
+          <IconPlayerPlay
+            style={{ transition: "stroke 0.2s" }}
+            color={COLORS.FRONT[stat]}
+            size={ICON_SIZE}
+          />
+        </ActionIcon>
+        <ActionIcon
+          style={{
+            position: "absolute",
+            top: `calc(50% - ${ICON_SIZE / 2}px + ${
+              stat === STATS.PLAY ? 0 : ICON_SIZE
+            }px)`,
+            left: `calc(50% + ${GAP / 2}px)`,
+            opacity: stat === STATS.PLAY ? 1 : 0,
+            transition: "top 0.2s, left 0.2s, opacity 0.2s",
+          }}
+          variant="transparent"
+          size={ICON_SIZE}
+          onClick={(event) => {
+            if (stat !== STATS.PLAY) return;
+            event.stopPropagation();
             StopAudio();
-            StartRecord();
-            break;
-        }
-      }}
-    >
-      <ActionIcon
-        style={{
-          position: "absolute",
-          top: `calc(50% - ${ICON_SIZE / 2}px)`,
-          left: `calc(50% - ${ICON_SIZE / 2}px - ${
-            stat <= STATS.RECORD ? 0 : (ICON_SIZE + GAP) / 2
-          }px)`,
-          transition: "top 0.2s, left 0.2s",
-        }}
-        variant="transparent"
-        size={ICON_SIZE}
-        onClick={(event) => {
-          event.stopPropagation();
-          if (stat === STATS.RECORD) StopRecord();
-          else StartRecord();
-        }}
-      >
-        <IconMicrophone
-          style={{ transition: "stroke 0.2s" }}
-          color={COLORS.FRONT[stat]}
-          size={ICON_SIZE}
-        />
-      </ActionIcon>
-      <ActionIcon
-        style={{
-          position: "absolute",
-          top: `calc(50% - ${ICON_SIZE / 2}px - ${
-            stat === STATS.DONE ? 0 : ICON_SIZE
-          }px)`,
-          left: `calc(50% + ${GAP / 2}px)`,
-          opacity: stat === STATS.DONE ? 1 : 0,
-          transition: "top 0.2s, left 0.2s, opacity 0.2s",
-        }}
-        variant="transparent"
-        size={ICON_SIZE}
-        onClick={(event) => {
-          if (stat !== STATS.DONE) return;
-          event.stopPropagation();
-          PlayAudio();
-        }}
-      >
-        <IconPlayerPlay
-          style={{ transition: "stroke 0.2s" }}
-          color={COLORS.FRONT[stat]}
-          size={ICON_SIZE}
-        />
-      </ActionIcon>
-      <ActionIcon
-        style={{
-          position: "absolute",
-          top: `calc(50% - ${ICON_SIZE / 2}px + ${
-            stat === STATS.PLAY ? 0 : ICON_SIZE
-          }px)`,
-          left: `calc(50% + ${GAP / 2}px)`,
-          opacity: stat === STATS.PLAY ? 1 : 0,
-          transition: "top 0.2s, left 0.2s, opacity 0.2s",
-        }}
-        variant="transparent"
-        size={ICON_SIZE}
-        onClick={(event) => {
-          if (stat !== STATS.PLAY) return;
-          event.stopPropagation();
-          StopAudio();
-        }}
-      >
-        <IconPlayerStop
-          style={{ transition: "stroke 0.2s" }}
-          color={COLORS.FRONT[stat]}
-          size={ICON_SIZE}
-        />
-      </ActionIcon>
-    </Box>
+          }}
+        >
+          <IconPlayerStop
+            style={{ transition: "stroke 0.2s" }}
+            color={COLORS.FRONT[stat]}
+            size={ICON_SIZE}
+          />
+        </ActionIcon>
+      </Box>
+    </>
   );
 }

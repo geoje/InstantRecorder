@@ -3,19 +3,16 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
+import { appWithTranslation } from "next-i18next";
 
-export default function App(props: AppProps) {
-  const { Component, pageProps } = props;
-
-  return (
+export default appWithTranslation(
+  ({ Component, pageProps: { session, ...pageProps } }: AppProps) => (
     <>
       <Head>
         <title>Instant Recorder</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width"
-        />
+        <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       </Head>
 
       <MantineProvider withGlobalStyles withNormalizeCSS>
@@ -23,5 +20,5 @@ export default function App(props: AppProps) {
         <Component {...pageProps} />
       </MantineProvider>
     </>
-  );
-}
+  )
+);

@@ -75,7 +75,6 @@ jobs:
           ssh_private_key: ${{ secrets.KEY }}
           local_path: ./next-i18next.config.js
           remote_path: ${{ github.event.repository.name }}/next-i18next.config.js
-          delete_remote_files: true
 
       - name: 🚚 Deploy .next
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4

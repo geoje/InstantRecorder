@@ -3,10 +3,12 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
-import { appWithTranslation } from "next-i18next";
 
-export default appWithTranslation(
-  ({ Component, pageProps: { session, ...pageProps } }: AppProps) => (
+export default function App({
+  Component,
+  pageProps: { session, ...pageProps },
+}: AppProps) {
+  return (
     <>
       <Head>
         <title>Instant Recorder</title>
@@ -20,5 +22,5 @@ export default appWithTranslation(
         <Component {...pageProps} />
       </MantineProvider>
     </>
-  )
-);
+  );
+}

@@ -46,24 +46,6 @@ jobs:
           SSH_USER: ${{ secrets.USER }}
           SSH_KEY: ${{ secrets.KEY }}
 
-      - name: 🚚 Deploy next.config.js
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          username: ${{ secrets.USER }}
-          server: ${{ secrets.HOST }}
-          ssh_private_key: ${{ secrets.KEY }}
-          local_path: ./next.config.js
-          remote_path: ${{ github.event.repository.name }}/
-
-      - name: 🚚 Deploy next-i18next.config.js
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          username: ${{ secrets.USER }}
-          server: ${{ secrets.HOST }}
-          ssh_private_key: ${{ secrets.KEY }}
-          local_path: ./next-i18next.config.js
-          remote_path: ${{ github.event.repository.name }}/
-
       - name: 🚚 Deploy package.json
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
@@ -93,16 +75,6 @@ jobs:
           ssh_private_key: ${{ secrets.KEY }}
           local_path: ./.next/*
           remote_path: ${{ github.event.repository.name }}/.next/
-          delete_remote_files: true
-
-      - name: 🚚 Deploy public
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          username: ${{ secrets.USER }}
-          server: ${{ secrets.HOST }}
-          ssh_private_key: ${{ secrets.KEY }}
-          local_path: ./public/*
-          remote_path: ${{ github.event.repository.name }}/public/
           delete_remote_files: true
 
       - name: ⏳ Stop pm2

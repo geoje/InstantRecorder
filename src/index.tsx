@@ -1,3 +1,5 @@
+import "./index.css";
+import ReactDOM from "react-dom/client";
 import { ActionIcon, Box, useMantineTheme } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import {
@@ -18,7 +20,10 @@ const STATS = {
 let mediaRecorder: MediaRecorder | undefined;
 let audioElement: HTMLAudioElement;
 
-export default function Home() {
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <App />
+);
+export default function App() {
   const theme = useMantineTheme();
   const COLORS = {
     BACK: [

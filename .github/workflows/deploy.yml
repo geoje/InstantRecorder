@@ -29,66 +29,10 @@ jobs:
       - name: 🛠️ Build
         run: npm run build
 
-      - name: 🔌 Configure SSH
-        run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/srv.key
-          chmod 600 ~/.ssh/srv.key
-          cat >> ~/.ssh/config <<END
-          Host srv
-            HostName $SSH_HOST
-            User $SSH_USER
-            IdentityFile ~/.ssh/srv.key
-            StrictHostKeyChecking no
-          END
-        env:
-          SSH_HOST: ${{ secrets.HOST }}
-          SSH_USER: ${{ secrets.USER }}
-          SSH_KEY: ${{ secrets.KEY }}
-
-      - name: 🚚 Deploy package.json
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: 🚚 Deploy to firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          username: ${{ secrets.USER }}
-          server: ${{ secrets.HOST }}
-          ssh_private_key: ${{ secrets.KEY }}
-          local_path: ./package.json
-          remote_path: ${{ github.event.repository.name }}/
-
-      - name: 🚚 Deploy package-lock.json
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          username: ${{ secrets.USER }}
-          server: ${{ secrets.HOST }}
-          ssh_private_key: ${{ secrets.KEY }}
-          local_path: ./package-lock.json
-          remote_path: ${{ github.event.repository.name }}/
-
-      - name: 📥 Install modules
-        run: ssh srv "cd ${{ github.event.repository.name }} && npm install"
-
-      - name: 🚚 Deploy .next
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          username: ${{ secrets.USER }}
-          server: ${{ secrets.HOST }}
-          ssh_private_key: ${{ secrets.KEY }}
-          local_path: ./.next/*
-          remote_path: ${{ github.event.repository.name }}/.next/
-          delete_remote_files: true
-
-      - name: 🚚 Deploy public
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          username: ${{ secrets.USER }}
-          server: ${{ secrets.HOST }}
-          ssh_private_key: ${{ secrets.KEY }}
-          local_path: ./public/*
-          remote_path: ${{ github.event.repository.name }}/public/
-          delete_remote_files: true
-
-      - name: ⏳ Stop pm2
-        run: ssh srv "pm2 stop ${{ github.event.repository.name }}"
-
-      - name: 🎉 Start pm2
-        run: ssh srv "pm2 start ${{ github.event.repository.name }}"
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_WOMOSO }}"
+          channelId: live
+          projectId: womorec
